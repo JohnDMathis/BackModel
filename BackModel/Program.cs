@@ -8,13 +8,17 @@ namespace BackModel
         public static bool Debug = false;
         static void Main(string[] args)
         {
+#if (DEBUG)
+            Debug=true;
+#endif
+
             string source;
             string dest;
             if (Debug)
             {
-                var testsource = @"C:\Users\John\Documents\GitHub\celljournalist\enterprise.reboot\models\";
-                var testdest = @"c:\users\john\documents\github\celljournalist\enterprise.reboot\client\generated\";
-                args = new[] { testsource, testdest, "GalleryItemModel.cs", "GalleryModel.cs", "GalleryType.cs", "MyGalleryStatus.cs" };
+                var testsource = @"C:\Users\John\Documents\GitHub\integration\Kanban.Integration.ClientService\IntegrationService\API\";
+                var testdest = @"C:\Users\John\Documents\GitHub\integration\Kanban.Integration.ClientService\IntegrationService\Site\generated\";
+                args = new[] { testsource, testdest, "Models.cs"};
             }
                 source = args[0];
                 dest = args[1];
@@ -33,7 +37,7 @@ namespace BackModel
                         for (int i = 2; i < len; i++)
                         {
                             file = source + args[i];
-                            ObjectToJs.Convert(file, dest);
+                            ObjectToJs.Convert(file, dest, args[i].Replace(".cs",".js"));
                         }
                     }
                 }

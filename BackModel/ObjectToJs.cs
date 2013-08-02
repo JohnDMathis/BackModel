@@ -15,15 +15,23 @@ namespace BackModel
     {
         private static string output = "";
         private static string _jsfilename = "";
+        private static string _jsNamespace = "codegen.models";
+        private static string _jsModelBase = "Backbone.Model";
+        private const string NAMESPACE = "// Namespace:";
+        private const string MODELBASE = "// ModelBase:";
         private static FileType fileType;
-        public static void Convert(string csFile, string jsFolder)
+
+        public static void Convert(string csFile, string jsFolder, string fileName=null)
         {
             // convert any enums found in 'csFile' to the same-named js file in 'jsFolder'
             // overwrite the js file if it exists
 
             // open csFile or throw exception
             output = "";
-            _jsfilename = "";
+
+            if (fileName != null)
+                _jsfilename = fileName;
+
             IEnumerable<string> lines=new List<string>();
             try
             {
@@ -41,6 +49,18 @@ namespace BackModel
             {
                 if (inNamespace)
                 {
+                    // check for name space definition
+                    if(line.Contains(NAMESPACE))
+                    {
+                        ParseNamespace(line.Trim());
+                    }
+
+                    // check for model base definition
+                    if(line.Contains(MODELBASE))
+                    {
+                        ParseModelBase(line.Trim());
+                    }
+
                     if(line.Contains("public enum"))
                     {
                         ParseDeclaration(line.Trim(), FileType.Enum);
@@ -75,10 +95,23 @@ namespace BackModel
                 Console.WriteLine(output);
             if (!string.IsNullOrEmpty(output))
             {
-                string fName = jsFolder + _jsfilename;
+
+                string fName = jsFolder +  _jsfilename;
                 Console.WriteLine("Save to: " + fName);
                 File.WriteAllText(fName, output);
             }
+        }
+
+        private static void ParseNamespace(string line)
+        {
+            var pos = line.IndexOf(NAMESPACE) + NAMESPACE.Length;
+            _jsNamespace = line.Substring(pos);
+        }
+
+        private static void ParseModelBase(string line)
+        {
+            var pos = line.IndexOf(MODELBASE) + MODELBASE.Length;
+            _jsModelBase = line.Substring(pos);
         }
 
         static byte[] GetBytes(string str)
@@ -112,15 +145,19 @@ namespace BackModel
                 name = line;
             else
                 name = line.Substring(0, p);
-            var p2 = line.IndexOf("// ClientName:");
-            if (p2 > -1)
-                name = line.Substring(p2 + 14);
-            if(_jsfilename=="") _jsfilename = name + ".js";
+
+            if (_jsfilename == "") _jsfilename = name + ".js";
+
+
             output += "\n\n";
+
+
             if (fileType == FileType.Enum)
-                output += name + " = {\n";
+                output += string.Format("{0}.{1} = ", _jsNamespace, name);
             else
-                output += "codegen.models." + name + " = CJ.Model.extend({\n";
+                output += string.Format("{0}.{1} = {2}.extend(", _jsNamespace, name, _jsModelBase);
+
+            output += "{\n";
         }
 
         private static void ParseLine(string line)
@@ -161,6 +198,7 @@ namespace BackModel
             var func = template.Replace("###", propName);
             output += "   " + func + "\n";
         }
+
     }
 }
 
