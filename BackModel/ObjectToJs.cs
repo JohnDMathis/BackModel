@@ -19,6 +19,8 @@ namespace BackModel
         private static string _jsModelBase = "Backbone.Model";
         private const string NAMESPACE = "// Namespace:";
         private const string MODELBASE = "// ModelBase:";
+        private const string END = "// End";
+
         private static FileType fileType;
 
         public static void Convert(string csFile, string jsFolder, string fileName=null)
@@ -45,10 +47,19 @@ namespace BackModel
             bool inNamespace = false;
             bool inBody = false;
             int i;
+            bool ignoreTheRest = false;
             foreach (var line in lines)
             {
                 if (inNamespace)
                 {
+                    if (ignoreTheRest) continue;
+                    
+                    if(line.Contains(END))
+                    {
+                        ignoreTheRest = true;
+                        continue;
+                    }
+
                     // check for name space definition
                     if(line.Contains(NAMESPACE))
                     {

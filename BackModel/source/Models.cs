@@ -16,4 +16,16 @@
         public bool UpdateCards { get; set; }
         public bool UpdateTargetItems { get; set; }
     }
+	
+	// End
+	
+	public class SomeAutoMappingConfig
+	{
+		public void Init()
+		{
+			//Mapper.CreateMap....
+		}
+	}
+		
+		
 }
