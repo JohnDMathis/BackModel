@@ -1,4 +1,6 @@
-﻿namespace BackModel.source
+﻿using System.Collections.Generic;
+
+namespace BackModel.source
 {
     // Namespace:mystuff.coolstuff
     // ModelBase:NiceTools.Model
@@ -15,6 +17,7 @@
         public string TargetProjectId { get; set; }
         public bool UpdateCards { get; set; }
         public bool UpdateTargetItems { get; set; }
+        public Dictionary<long, string> SomeMappingThing { get; set; }
     }
 	
 	// End

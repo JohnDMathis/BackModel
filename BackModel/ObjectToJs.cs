@@ -200,7 +200,13 @@ namespace BackModel
             if(line.Length==0) return;
             var start = line.IndexOf("public ");
             if(start==-1) return;
-            var startOfName = line.IndexOf(' ', 7) + 1;
+            int startOfName;
+            if (line.Contains("<") && line.Contains(">"))
+                // must be a generic
+                startOfName = line.LastIndexOf(">", StringComparison.Ordinal) + 2;
+            else
+                startOfName = line.IndexOf(' ', 7) + 1;
+
             var endOfName = line.IndexOf(' ', startOfName + 1);
             if (endOfName == -1) return;
             var propName = line.Substring(startOfName, (endOfName - startOfName));
