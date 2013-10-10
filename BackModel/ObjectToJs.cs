@@ -22,6 +22,7 @@ namespace BackModel
         private const string END = "// End";
 
         private static FileType fileType;
+        private static bool _skippingMethod = false;
 
         public static void Convert(string csFile, string jsFolder, string fileName=null)
         {
@@ -82,7 +83,7 @@ namespace BackModel
                     }
                     if (inBody)
                     {
-                        if (IsEndOfBody(line))
+                        if (!_skippingMethod && IsEndOfBody(line))
                         {
                             inBody = false;
                             var lastComma = output.LastIndexOf(",");
@@ -198,8 +199,18 @@ namespace BackModel
         private static void ParseModelLine(string line)
         {
             if(line.Length==0) return;
-            var start = line.IndexOf("public ");
+            var start = line.IndexOf("public ", StringComparison.Ordinal);
             if(start==-1) return;
+
+            // skip method definition
+            if (_skippingMethod)
+                _skippingMethod = false;
+            else if (line.IndexOf("(", StringComparison.Ordinal) > 0)
+            {
+                _skippingMethod = true;
+                return;
+            }
+
             int startOfName;
             if (line.Contains("<") && line.Contains(">"))
                 // must be a generic
@@ -211,7 +222,7 @@ namespace BackModel
             if (endOfName == -1) return;
             var propName = line.Substring(startOfName, (endOfName - startOfName));
             if (propName.IndexOfAny(new[] { '(', ')', '{', '}', ';' }) > -1) return;
-            var template = "###:function (val) { if (val) this.set('###', val); else return this.get('###');},";
+            var template = "###:function (val, silent) { silent = silent ? { silent: true } : null; if (!_.isUndefined(val)) this.set('###', val, silent); else return this.get('###');},";
             var func = template.Replace("###", propName);
             output += "   " + func + "\n";
         }

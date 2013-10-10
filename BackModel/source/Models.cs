@@ -12,6 +12,10 @@ namespace BackModel.source
 
     public class BoardProjectMapping
     {
+        public BoardProjectMapping()
+        {
+            Name = "";
+        }
         public long Id { get; set; }
         public string Name { get; set; }
         public string TargetProjectId { get; set; }
